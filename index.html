@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Калкулатор Ресто EUR / BGN</title>
+    <title>Калкулатор EUR / BGN</title>
 
     <style>
         :root {
@@ -13,26 +13,50 @@
             --card-bg: #ffffff;
             --radius: 14px;
             --shadow: 0 8px 25px rgba(0,0,0,0.08);
+            --text: #333;
+            --text-light: #666;
+            --border: #ccd5e0;
+        }
+
+        [data-theme="dark"] {
+            --primary: #4a8ff7;
+            --primary-dark: #3a7fd7;
+            --bg: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --text: #e0e0e0;
+            --text-light: #b0b0b0;
+            --border: #444;
         }
 
         * { box-sizing: border-box; font-family: "Segoe UI", Arial, sans-serif; }
 
         body {
             background: var(--bg);
+            color: var(--text);
             margin: 0;
-            padding: 30px 15px;
+            padding: 20px 15px;
             display: flex;
             justify-content: center;
+            transition: background .3s, color .3s;
         }
 
         .container {
             width: 100%;
             max-width: 520px;
             background: var(--card-bg);
-            padding: 30px;
+            padding: 25px 20px;
             border-radius: var(--radius);
             box-shadow: var(--shadow);
             animation: fadeIn .4s ease;
+            transition: background .3s;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px 15px;
+                border-radius: 10px;
+                max-width: 100%;
+            }
         }
 
         @keyframes fadeIn {
@@ -40,21 +64,57 @@
             to { opacity: 1; transform: scale(1); }
         }
 
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            gap: 10px;
+        }
+
         h1 {
             text-align: center;
-            margin-bottom: 25px;
+            margin: 0;
             color: var(--primary);
             font-weight: 800;
-            font-size: 26px;
+            font-size: 24px;
+            flex: 1;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: .2s;
+            flex-shrink: 0;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 20px;
+            }
+            .theme-toggle {
+                font-size: 20px;
+            }
         }
 
         .rate-box {
-            background: #e7f2ff;
-            border-left: 5px solid var(--primary);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border-left: 5px solid var(--primary-dark);
             padding: 12px 15px;
             border-radius: var(--radius);
             margin-bottom: 25px;
-            font-size: 1.05em;
+            font-size: 1em;
             font-weight: 600;
             text-align: center;
         }
@@ -65,15 +125,17 @@
             display: block;
             margin-bottom: 6px;
             font-weight: 600;
-            color: #333;
+            color: var(--text);
         }
 
         input {
             width: 100%;
             padding: 14px;
             border-radius: var(--radius);
-            border: 1px solid #ccd5e0;
-            font-size: 17px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text);
+            font-size: 16px;
             transition: .2s;
         }
 
@@ -81,6 +143,17 @@
             border-color: var(--primary);
             outline: none;
             box-shadow: 0 0 0 3px rgba(0,87,184,0.15);
+        }
+
+        [data-theme="dark"] input:focus {
+            box-shadow: 0 0 0 3px rgba(74,143,247,0.2);
+        }
+
+        @media (max-width: 480px) {
+            input {
+                padding: 12px;
+                font-size: 16px;
+            }
         }
 
         .buttons {
@@ -94,10 +167,17 @@
             padding: 14px;
             border: none;
             border-radius: var(--radius);
-            font-size: 17px;
+            font-size: 16px;
             cursor: pointer;
             font-weight: 700;
             transition: .2s;
+        }
+
+        @media (max-width: 480px) {
+            button {
+                padding: 12px;
+                font-size: 15px;
+            }
         }
 
         #calculateBtn {
@@ -114,29 +194,32 @@
 
         #clearBtn:hover { background: #555; }
 
+        [data-theme="dark"] #clearBtn:hover { background: #888; }
+
         .result-box {
             margin-top: 25px;
             padding: 20px;
             border-radius: var(--radius);
-            background: #f7f9fc;
-            border: 1px solid #dce3ec;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
             display: none;
             animation: fadeIn .4s ease;
+            opacity: 0.95;
         }
 
         .result-box h3 {
             text-align: center;
             margin: 0 0 15px;
             color: var(--primary);
-            font-size: 22px;
+            font-size: 20px;
         }
 
         .row {
             display: flex;
             justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #e4e7ec;
-            font-size: 1.05em;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 1em;
         }
 
         .row:last-child { border-bottom: none; }
@@ -144,12 +227,14 @@
         .euro { color: #0b8f14; font-weight: 700; }
         .bgn { color: #b98500; font-weight: 700; }
         .change-bgn { color: #c21807; font-weight: 700; }
+
         .final {
-            background: #e7f2ff;
-            padding: 12px 15px;
+            background: var(--primary);
+            color: white;
+            padding: 15px;
             margin-top: 15px;
             border-radius: var(--radius);
-            font-size: 1.2em;
+            font-size: 1.1em;
             font-weight: 700;
             text-align: center;
         }
@@ -161,7 +246,10 @@
 <body>
 
 <div class="container">
-    <h1>Калкулатор EUR → BGN Ресто</h1>
+    <div class="header">
+        <h1>Калкулатор EUR → BGN</h1>
+        <button class="theme-toggle" id="themeToggle" title="Тъмна тема">🌙</button>
+    </div>
 
     <div class="rate-box">Фиксиран курс: <strong>1 € = 1.95583 лв.</strong></div>
 
@@ -189,11 +277,34 @@
 <script>
 const RATE = 1.95583;
 
+const amount = document.getElementById('amount');
+const received = document.getElementById('received');
+const details = document.getElementById('details');
+const result = document.getElementById('result');
+const calculateBtn = document.getElementById('calculateBtn');
+const clearBtn = document.getElementById('clearBtn');
+const themeToggle = document.getElementById('themeToggle');
+
+// Dark theme toggle
+const savedTheme = localStorage.getItem('theme') || 'light';
+if (savedTheme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    themeToggle.textContent = '☀️';
+}
+
+themeToggle.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+});
+
 function calc() {
     const eur = parseFloat(amount.value);
     const bgn = parseFloat(received.value);
 
-    if (!eur || !bgn || eur <= 0 || bgn <= 0) {
+    if (isNaN(eur) || isNaN(bgn) || eur <= 0 || bgn <= 0) {
         alert("Въведете валидни положителни стойности.");
         return;
     }
@@ -220,12 +331,18 @@ function calc() {
     result.style.display = "block";
 }
 
-calculateBtn.onclick = calc;
-clearBtn.onclick = () => {
-    amount.value = "";
-    received.value = "";
-    result.style.display = "none";
-};
+if (calculateBtn) calculateBtn.addEventListener('click', calc);
+if (clearBtn) clearBtn.addEventListener('click', () => {
+    if (amount) amount.value = "";
+    if (received) received.value = "";
+    if (result) result.style.display = "none";
+});
+
+// Allow Enter key to calculate
+if (amount && received) {
+    amount.addEventListener('keypress', (e) => { if (e.key === 'Enter') calc(); });
+    received.addEventListener('keypress', (e) => { if (e.key === 'Enter') calc(); });
+}
 </script>
 
 </body>
