@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Калкулатор Ресто EUR / BGN</title>
+
+    <style>
+        :root {
+            --primary: #0057b8;
+            --primary-dark: #004499;
+            --bg: #eef3f8;
+            --card-bg: #ffffff;
+            --radius: 14px;
+            --shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+
+        * { box-sizing: border-box; font-family: "Segoe UI", Arial, sans-serif; }
+
+        body {
+            background: var(--bg);
+            margin: 0;
+            padding: 30px 15px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            animation: fadeIn .4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(.97); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 26px;
+        }
+
+        .rate-box {
+            background: #e7f2ff;
+            border-left: 5px solid var(--primary);
+            padding: 12px 15px;
+            border-radius: var(--radius);
+            margin-bottom: 25px;
+            font-size: 1.05em;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .group { margin-bottom: 22px; }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border-radius: var(--radius);
+            border: 1px solid #ccd5e0;
+            font-size: 17px;
+            transition: .2s;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0,87,184,0.15);
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 17px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: .2s;
+        }
+
+        #calculateBtn {
+            background: var(--primary);
+            color: white;
+        }
+
+        #calculateBtn:hover { background: var(--primary-dark); }
+
+        #clearBtn {
+            background: #777;
+            color: white;
+        }
+
+        #clearBtn:hover { background: #555; }
+
+        .result-box {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: var(--radius);
+            background: #f7f9fc;
+            border: 1px solid #dce3ec;
+            display: none;
+            animation: fadeIn .4s ease;
+        }
+
+        .result-box h3 {
+            text-align: center;
+            margin: 0 0 15px;
+            color: var(--primary);
+            font-size: 22px;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e4e7ec;
+            font-size: 1.05em;
+        }
+
+        .row:last-child { border-bottom: none; }
+
+        .euro { color: #0b8f14; font-weight: 700; }
+        .bgn { color: #b98500; font-weight: 700; }
+        .change-bgn { color: #c21807; font-weight: 700; }
+        .final {
+            background: #e7f2ff;
+            padding: 12px 15px;
+            margin-top: 15px;
+            border-radius: var(--radius);
+            font-size: 1.2em;
+            font-weight: 700;
+            text-align: center;
+        }
+    </style>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0057b8">
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js");}</script>
+</head>
+<body>
+
+<div class="container">
+    <h1>Калкулатор EUR → BGN Ресто</h1>
+
+    <div class="rate-box">Фиксиран курс: <strong>1 € = 1.95583 лв.</strong></div>
+
+    <div class="group">
+        <label>Цена в евро:</label>
+        <input type="number" id="amount" step="0.01" placeholder="Въведете сума (EUR)">
+    </div>
+
+    <div class="group">
+        <label>Получени лева от клиента:</label>
+        <input type="number" id="received" step="0.01" placeholder="Въведете сума (BGN)">
+    </div>
+
+    <div class="buttons">
+        <button id="calculateBtn">Изчисли</button>
+        <button id="clearBtn">Изчисти</button>
+    </div>
+
+    <div class="result-box" id="result">
+        <h3>Резултат</h3>
+        <div id="details"></div>
+    </div>
+</div>
+
+<script>
+const RATE = 1.95583;
+
+function calc() {
+    const eur = parseFloat(amount.value);
+    const bgn = parseFloat(received.value);
+
+    if (!eur || !bgn || eur <= 0 || bgn <= 0) {
+        alert("Въведете валидни положителни стойности.");
+        return;
+    }
+
+    const priceBGN = eur * RATE;
+
+    if (bgn < priceBGN) {
+        alert(`Недостатъчна сума. Трябват още ${(priceBGN - bgn).toFixed(2)} лв.`);
+        return;
+    }
+
+    const changeBGN = bgn - priceBGN;
+    const changeEUR = changeBGN / RATE;
+
+    details.innerHTML = `
+        <div class='row'><span>Цена:</span><span class='euro'>${eur.toFixed(2)} €</span></div>
+        <div class='row'><span>Цена в лева:</span><span class='bgn'>${priceBGN.toFixed(2)} лв.</span></div>
+        <div class='row'><span>Получено:</span><span class='bgn'>${bgn.toFixed(2)} лв.</span></div>
+        <div class='row'><span>Ресто в лева:</span><span class='change-bgn'>${changeBGN.toFixed(2)} лв.</span></div>
+        <div class='row'><span>Ресто в евро:</span><span class='euro'>${changeEUR.toFixed(2)} €</span></div>
+        <div class='final'>Върнете: ${changeEUR.toFixed(2)} €</div>
+    `;
+
+    result.style.display = "block";
+}
+
+calculateBtn.onclick = calc;
+clearBtn.onclick = () => {
+    amount.value = "";
+    received.value = "";
+    result.style.display = "none";
+};
+</script>
+
+</body>
+</html>
